@@ -2,7 +2,7 @@
 
 set -eu
 
-curl -sfL https://get.k3s.io | K3S_KUBECONFIG_MODE="644" sh - --disable=traefik --disable=metrics-server --disable=servicelb
+curl -sfL https://get.k3s.io | K3S_KUBECONFIG_MODE="644" sh -s - --disable=traefik --disable=metrics-server --disable=servicelb
 
 # Uninstalling
 # /usr/local/bin/k3s-killall.sh
