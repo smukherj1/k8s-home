@@ -31,8 +31,8 @@ handle_command() {
         helm upgrade redpanda redpanda/redpanda -f redpanda_values.yml -n redpanda > redpanda_deployment.log
       ;;
     "uninstall")
-        helm uinstall redpanda
-        helm uinstall cert-manager
+        helm uninstall -n redpanda redpanda
+        helm uninstall -n cert-manager cert-manager
       ;;
     *)
       echo "Invalid command: $component"
@@ -52,3 +52,4 @@ fi
 handle_command "$1"
 
 exit $? # Exit with the return code of the function
+

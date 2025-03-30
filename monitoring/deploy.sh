@@ -20,10 +20,10 @@ handle_component_command() {
         helm install ${component} grafana/${component} -n grafana -f ${component}_values.yml > ${component}_deployment.log
       ;;
     "update")
-        helm upgrade ${component} grafana/${component} -f ${component}_values.yml -n grafana > ${component}_deployment.log
+        helm upgrade ${component} grafana/${component} -n grafana -f ${component}_values.yml > ${component}_deployment.log
       ;;
     "uninstall")
-        helm uinstall ${component}
+        helm uninstall -n grafana ${component}
       ;;
     *)
       echo "Invalid command: $component"
@@ -45,3 +45,4 @@ fi
 handle_component_command "$1" "$2"
 
 exit $? # Exit with the return code of the function
+
