@@ -44,3 +44,35 @@ sudo systemctl daemon-reload
 sudo systemctl restart k3s
 sudo systemctl status k3s
 ```
+
+## Step 5: Install Helm
+
+1. Verify the contents of `https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3`.
+
+1. Download and install Helm
+
+```shell
+curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+```
+
+## Step 4: Install Tailscale VPN Client and Ingress Controller
+
+1. Install the tailscale client where you'll be accessing services running on
+   the k8s cluster from. [link](https://tailscale.com/kb/1031/install-linux).
+
+1. Following the [prerequisites](https://tailscale.com/kb/1236/kubernetes-operator#prerequisites),
+   add a `JSON` file to a Github repo with the following contents:
+
+```JSON
+{
+  "tagOwners": {
+    "tag:k8s-operator": [],
+    "tag:k8s": ["tag:k8s-operator"]
+  }
+}
+```
+
+Then go to Settings in the Tailscale console and link to the submitted JSON file in the
+tailnet policy settings.
+
+1. Install the tailscale Ingress Controller [link](https://tailscale.com/kb/1439/kubernetes-operator-cluster-ingress).
