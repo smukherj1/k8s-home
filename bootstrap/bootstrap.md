@@ -76,3 +76,58 @@ Then go to Settings in the Tailscale console and link to the submitted JSON file
 tailnet policy settings.
 
 1. Install the tailscale Ingress Controller [link](https://tailscale.com/kb/1439/kubernetes-operator-cluster-ingress).
+
+```shell
+helm repo add tailscale https://pkgs.tailscale.com/helmcharts
+helm repo update
+KUBECONFIG=/etc/rancher/k3s/k3s.yaml helm upgrade \
+  --install \
+  tailscale-operator \
+  tailscale/tailscale-operator \
+  --namespace=tailscale \
+  --create-namespace \
+  --set-string oauth.clientId="<OAauth client ID>" \
+  --set-string oauth.clientSecret="<OAuth client secret>" \
+  --wait
+```
+
+The output should look something like
+
+```shell
+Release "tailscale-operator" does not exist. Installing it now.
+NAME: tailscale-operator
+LAST DEPLOYED: Thu Oct 16 21:58:28 2025
+NAMESPACE: tailscale
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+NOTES:
+You have successfully installed the Tailscale Kubernetes Operator!
+
+Once connected, the operator should appear as a device within the Tailscale admin console:
+https://login.tailscale.com/admin/machines
+
+If you have not used the Tailscale operator before, here are some examples to try out:
+
+* Private Kubernetes API access and authorization using the API server proxy
+  https://tailscale.com/kb/1437/kubernetes-operator-api-server-proxy
+
+* Private access to cluster Services using an ingress proxy
+  https://tailscale.com/kb/1439/kubernetes-operator-cluster-ingress
+
+* Private access to the cluster's available subnets using a subnet router
+  https://tailscale.com/kb/1441/kubernetes-operator-connector
+
+You can also explore the CRDs, operator, and associated resources within the tailscale namespace:
+
+$ kubectl explain connector
+$ kubectl explain proxygroup
+$ kubectl explain proxyclass
+$ kubectl explain recorder
+$ kubectl explain dnsconfig
+
+If you're interested to explore what resources were created:
+
+$ kubectl --namespace=tailscale get all -l app.kubernetes.io/managed-by=Helm
+
+```
