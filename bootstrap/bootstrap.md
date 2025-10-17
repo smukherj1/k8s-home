@@ -2,6 +2,10 @@
 
 ## Step 1: K3S Installation
 
+1.  Reserve a static IP address in the Router DHCP settings for the machine.
+
+1.  Install k3s.
+
 ```shell
 curl -sfL https://get.k3s.io | K3S_KUBECONFIG_MODE="644" sh -s - --disable=traefik --disable=metrics-server --disable=servicelb
 ```
@@ -47,6 +51,14 @@ sudo systemctl status k3s
 
 ## Step 5: Install Helm
 
+1. Tell Helm about the custom location of the k3s kubeconfig file by adding the following
+   to `~/.bashrc`.
+
+```shell
+# Point helm to the custom k3s kubeconfig location.
+export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+```
+
 1. Verify the contents of `https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3`.
 
 1. Download and install Helm
@@ -80,7 +92,7 @@ tailnet policy settings.
 ```shell
 helm repo add tailscale https://pkgs.tailscale.com/helmcharts
 helm repo update
-KUBECONFIG=/etc/rancher/k3s/k3s.yaml helm upgrade \
+helm upgrade \
   --install \
   tailscale-operator \
   tailscale/tailscale-operator \
@@ -131,3 +143,34 @@ If you're interested to explore what resources were created:
 $ kubectl --namespace=tailscale get all -l app.kubernetes.io/managed-by=Helm
 
 ```
+
+## Step 5: Install Argo CD
+
+1. Following the instructions [here](https://argo-cd.readthedocs.io/en/stable/operator-manual/installation/#non-high-availability) to
+   install Argo CD Non-HA
+
+```shell
+# Get the latest version from https://github.com/argoproj/argo-cd/releases.
+kubectl create namespace argocd
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/v3.1.8/manifests/install.yaml
+```
+
+1. Use port forwarding and ssh tunneling to access the Argo CD UI for now
+
+```shell
+# Run the following on the kubernetes node
+kubectl port-forward svc/argocd-server -n argocd 8080:443
+
+# Run the following from the client machine to access the
+# Argo UI server exposed by the port-forwarding command above.
+ssh -L 8080:localhost:8080 suvanjan@[node machineip]
+```
+
+1. Run the following on the kubernetes node to get the admin password
+
+```shell
+kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d
+```
+
+1. Log in to Argu UI at https://localhost:8080 on the client machine, log in using the username `admin`
+   and the password above. Change the password.
