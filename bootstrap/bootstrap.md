@@ -174,3 +174,6 @@ kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.pas
 
 1. Log in to Argu UI at https://localhost:8080 on the client machine, log in using the username `admin`
    and the password above. Change the password.
+
+1. Create an application in Argo called 'argo' that exposes the Argo CD server via the tailscale Ingress
+   object [here](https://github.com/smukherj1/k8s-home/blob/main/argocd/manifest.yml).
