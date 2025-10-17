@@ -151,6 +151,8 @@ $ kubectl --namespace=tailscale get all -l app.kubernetes.io/managed-by=Helm
 
 ```shell
 # Get the latest version from https://github.com/argoproj/argo-cd/releases.
+# If updating versions, also update the version in the install.yaml link in
+# the @/argocd/kustomization.yml where @ is the repo root.
 kubectl create namespace argocd
 kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/v3.1.8/manifests/install.yaml
 ```
@@ -175,5 +177,5 @@ kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.pas
 1. Log in to Argu UI at https://localhost:8080 on the client machine, log in using the username `admin`
    and the password above. Change the password.
 
-1. Create an application in Argo called 'argo' that exposes the Argo CD server via the tailscale Ingress
-   object [here](https://github.com/smukherj1/k8s-home/blob/main/argocd/manifest.yml).
+1. Create an application in Argo called 'argo' that exposes the Argo CD server to our tailscale tailnet
+   using the manifests [here](https://github.com/smukherj1/k8s-home/blob/main/argocd).
