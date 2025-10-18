@@ -8,7 +8,7 @@ metadata:
 spec:
   project: default
   sources:
-    - chart: mojo2600
+    - chart: pihole
       repoURL: https://mojo2600.github.io/pihole-kubernetes/
       targetRevision: 2.34.0
       helm:
