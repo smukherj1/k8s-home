@@ -17,16 +17,16 @@ spec:
     server: "https://kubernetes.default.svc"
     namespace: kubernetes-dashboard
   syncPolicy:
-  automated:
-    prune: true
-    selfHeal: true
-    enabled: true
-  syncOptions:
-    - CreateNamespace=true
-    - PrunePropagationPolicy=foreground
-  retry:
-    limit: 5
-    backoff:
-      duration: 5s
-      factor: 2
-      maxDuration: 3m0s
+    automated:
+      prune: true
+      selfHeal: true
+      enabled: true
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m0s
