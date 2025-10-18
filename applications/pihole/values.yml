@@ -1,0 +1,23 @@
+ingress:
+  enabled: true
+  ingressClassName: tailscale
+  hosts:
+  - pihole
+  
+admin:
+  enabled: true
+  existingSecret: "admin-creds"
+  passwordKey: "password"
+  
+# enables cloudflare tunnel sidecar container
+# and sets upstream dns in pihole to leverage it
+doh:
+  enabled: true
+  pullPolicy: Always
+  envVars: {
+    DOH_UPSTREAM: "https://1.1.1.1/dns-query"
+  }
+
+# Ads providers to block
+adlists:
+- https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
