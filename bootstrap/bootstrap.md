@@ -161,7 +161,7 @@ kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/v3
 
 ```shell
 # Run the following on the kubernetes node
-kubectl port-forward svc/argocd-server -n argocd 8080:443
+kubectl port-forward svc/argocd-server -n argocd 8080:80
 
 # Run the following from the client machine to access the
 # Argo UI server exposed by the port-forwarding command above.
@@ -179,3 +179,12 @@ kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.pas
 
 1. Create an application in Argo called 'argo' that exposes the Argo CD server to our tailscale tailnet
    using the manifests [here](https://github.com/smukherj1/k8s-home/blob/main/argocd).
+
+## Uninstalling K3S on a Node
+
+1. Run the uninstallation script created by the k3s installation
+
+```shell
+/usr/local/bin/k3s-killall.sh
+/usr/local/bin/k3s-uninstall.sh
+```
