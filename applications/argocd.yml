@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/smukherj1/k8s-home.git
-    path: argocd
+    path: applications/argocd
     targetRevision: main
   destination:
     server: https://kubernetes.default.svc
