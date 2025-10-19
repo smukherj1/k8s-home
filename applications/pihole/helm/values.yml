@@ -1,6 +1,6 @@
 # https://github.com/MoJo2600/pihole-kubernetes/blob/main/charts/pihole/values.yaml
 
-replicaCount: 1
+replicaCount: 2
 
 ingress:
   enabled: false
@@ -23,3 +23,11 @@ adlists:
 - https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
 # https://github.com/hagezi/dns-blocklists?tab=readme-ov-file#pro
 - https://gitlab.com/hagezi/mirror/-/raw/main/dns-blocklists/adblock/pro.txt
+
+ftl:
+  MAXDBDAYS: 1
+
+persistentVolumeClaim:
+  enabled: true
+  size: "500Mi"
+  storageClass: local-path
