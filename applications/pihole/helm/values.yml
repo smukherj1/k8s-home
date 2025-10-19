@@ -6,8 +6,7 @@ serviceDhcp:
 
 serviceDns:
   type: LoadBalancer
-  annotations:
-    tailscale.com/expose: "true"
+  loadBalancerClass: "tailscale"
   
 admin:
   enabled: true
