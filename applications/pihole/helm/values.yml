@@ -1,3 +1,5 @@
+# https://github.com/MoJo2600/pihole-kubernetes/blob/main/charts/pihole/values.yaml
+
 replicaCount: 1
 
 ingress:
