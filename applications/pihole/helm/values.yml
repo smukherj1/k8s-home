@@ -5,7 +5,7 @@ serviceDhcp:
   enabled: false
 
 serviceDns:
-  type: ClusterIP
+  type: LoadBalancer
   annotations:
     tailscale.com/expose: "true"
   
