@@ -18,6 +18,8 @@ spec:
     - repoURL: https://github.com/smukherj1/k8s-home.git
       targetRevision: main
       ref: values
+    - repoURL: https://github.com/smukherj1/k8s-home.git
+      targetRevision: main
       path: applications/pihole
   destination:
     server: "https://kubernetes.default.svc"
