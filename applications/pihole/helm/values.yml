@@ -1,8 +1,8 @@
 ingress:
-  enabled: true
-  ingressClassName: tailscale
-  hosts:
-  - pihole.suvanjanlabs.com
+  enabled: false
+
+serviceDhcp:
+  enabled: false
   
 admin:
   enabled: true

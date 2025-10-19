@@ -14,10 +14,11 @@ spec:
       helm:
         releaseName: pihole
         valueFiles:
-        - $values/applications/pihole/values.yml
+        - $values/applications/pihole/helm/values.yml
     - repoURL: https://github.com/smukherj1/k8s-home.git
       targetRevision: main
       ref: values
+      path: applications/pihole
   destination:
     server: "https://kubernetes.default.svc"
     namespace: pihole
