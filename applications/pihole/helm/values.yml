@@ -7,7 +7,7 @@ serviceDhcp:
 serviceDns:
   type: ClusterIP
   annotations:
-    tailscale.com/expose: true
+    tailscale.com/expose: "true"
   
 admin:
   enabled: true
