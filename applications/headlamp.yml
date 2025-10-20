@@ -23,7 +23,7 @@ spec:
       path: applications/headlamp
   destination:
     server: "https://kubernetes.default.svc"
-    namespace: homelab
+    namespace: headlamp
   syncPolicy:
     automated:
       prune: true
