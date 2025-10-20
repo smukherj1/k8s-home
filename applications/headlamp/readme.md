@@ -1,5 +1,5 @@
 # Generating Login Token
 
 ```shell
-kubectl create token admin-user -n headlamp --duration 10m
+kubectl create token headlamp -n headlamp --duration 10m
 ```
