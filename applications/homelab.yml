@@ -7,10 +7,10 @@ metadata:
   - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
-  sources:
-    - repoURL: https://github.com/smukherj1/k8s-home.git
-      targetRevision: main
-      path: applications/homelab
+  source:
+    repoURL: https://github.com/smukherj1/k8s-home.git
+    targetRevision: main
+    path: applications/homelab
   destination:
     server: "https://kubernetes.default.svc"
     namespace: homelab
