@@ -1,26 +1,16 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: headlamp
-  namespace: argocd
+  name: homelab
+  namespace: homelab
   finalizers:
   - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   sources:
-    - chart: headlamp
-      repoURL: https://kubernetes-sigs.github.io/headlamp/
-      targetRevision: 0.36.0
-      helm:
-        releaseName: headlamp
-        valueFiles:
-        - $values/applications/headlamp/helm/values.yml
     - repoURL: https://github.com/smukherj1/k8s-home.git
       targetRevision: main
-      ref: values
-    - repoURL: https://github.com/smukherj1/k8s-home.git
-      targetRevision: main
-      path: applications/headlamp
+      path: applications/homelab
   destination:
     server: "https://kubernetes.default.svc"
     namespace: homelab

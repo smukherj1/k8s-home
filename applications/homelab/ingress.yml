@@ -1,0 +1,21 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: homelab
+  namespace: homelab
+spec:
+  rules:
+  - http:
+      paths:
+      - pathType: Prefix
+        path: "/headlamp"
+        backend:
+          service:
+            name: headlamp
+            port:
+              number: 80
+  ingressClassName: tailscale
+  tls:
+    - hosts:
+        - headlamp
