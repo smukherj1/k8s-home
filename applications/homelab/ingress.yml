@@ -9,7 +9,7 @@ spec:
   - http:
       paths:
       - pathType: Prefix
-        path: "/headlamp"
+        path: /headlamp
         backend:
           service:
             name: headlamp
