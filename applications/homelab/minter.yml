@@ -33,7 +33,8 @@ metadata:
 spec:
   replicas: 1
   selector:
-    app.kubernetes.io/name: minter
+    matchLabels:
+      app.kubernetes.io/name: minter
   template:
     metadata:
       labels:
@@ -62,3 +63,4 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: cluster-admin
+  namespace: homelab
