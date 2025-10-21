@@ -45,7 +45,7 @@ spec:
         image: ghcr.io/smukherj1/homelab-depot/minter:main
         ports:
         - containerPort: 8080
-        serviceAccountName: cluster-admin
+      serviceAccountName: cluster-admin
 ---
 apiVersion: v1
 kind: ServiceAccount
