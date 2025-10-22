@@ -1,0 +1,40 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: valkey
+  namespace: argocd
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  sources:
+    - chart: valkey
+      repoURL: https://valkey.io/valkey-helm/
+      targetRevision: 0.7.5
+      helm:
+        releaseName: valkey
+        valueFiles:
+        - $values/applications/valkey/helm/values.yml
+    - repoURL: https://github.com/smukherj1/k8s-home.git
+      targetRevision: main
+      ref: values
+    - repoURL: https://github.com/smukherj1/k8s-home.git
+      targetRevision: main
+      path: applications/valkey
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: valkey
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      enabled: true
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m0s
