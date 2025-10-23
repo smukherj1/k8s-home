@@ -1,5 +1,0 @@
-
-config:
-  # Scope the cnpg operator to manage cnpg clusters in the same
-  # namespace the operator is running in.
-  clusterWide: false
