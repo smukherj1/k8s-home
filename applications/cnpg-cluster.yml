@@ -8,19 +8,19 @@ metadata:
 spec:
   project: default
   sources:
-    - chart: cloudnative-pg
+    - chart: cluster
       repoURL: https://cloudnative-pg.github.io/charts
-      targetRevision: 0.26.0
+      targetRevision: 0.3.1
       helm:
-        releaseName: cloudnative-pg
+        releaseName: cluster
         valueFiles:
-          - $values/applications/cnpg/helm/values.yml
+          - $values/applications/cnpg-cluster/helm/values.yml
     - repoURL: https://github.com/smukherj1/k8s-home.git
       targetRevision: main
       ref: values
     - repoURL: https://github.com/smukherj1/k8s-home.git
       targetRevision: main
-      path: applications/cnpg
+      path: applications/cnpg-cluster
   destination:
     server: "https://kubernetes.default.svc"
     namespace: cnpg

@@ -1,3 +1,3 @@
-Cloud Native PG Postgres Database: [link](https://github.com/cloudnative-pg/charts)
+Cloud Native Postgres Operator: [link](https://github.com/cloudnative-pg/charts)
 
-Used by Immich.
+Used by the Cloud Native Postgres Database Cluster.
