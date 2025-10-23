@@ -1,0 +1,40 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cnpg
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  sources:
+    - chart: cloudnative-pg
+      repoURL: https://cloudnative-pg.github.io/charts
+      targetRevision: 0.26.0
+      helm:
+        releaseName: cloudnative-pg
+        valueFiles:
+          - $values/applications/cnpg/helm/values.yml
+    - repoURL: https://github.com/smukherj1/k8s-home.git
+      targetRevision: main
+      ref: values
+    - repoURL: https://github.com/smukherj1/k8s-home.git
+      targetRevision: main
+      path: applications/cnpg
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: cnpg
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      enabled: true
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m0s
