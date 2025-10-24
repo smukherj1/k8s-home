@@ -12,7 +12,7 @@ spec:
       repoURL: https://cloudnative-pg.github.io/charts
       targetRevision: 0.3.1
       helm:
-        releaseName: cluster
+        releaseName: immich-db
         valueFiles:
           - $values/applications/immich-db/helm/values.yml
     - repoURL: https://github.com/smukherj1/k8s-home.git
