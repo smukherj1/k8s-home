@@ -14,13 +14,13 @@ spec:
       helm:
         releaseName: cluster
         valueFiles:
-          - $values/applications/cnpg-cluster/helm/values.yml
+          - $values/applications/immich-db/helm/values.yml
     - repoURL: https://github.com/smukherj1/k8s-home.git
       targetRevision: main
       ref: values
     - repoURL: https://github.com/smukherj1/k8s-home.git
       targetRevision: main
-      path: applications/cnpg-cluster
+      path: applications/immich-db
   destination:
     server: "https://kubernetes.default.svc"
     namespace: cnpg
