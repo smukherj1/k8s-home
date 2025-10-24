@@ -1,0 +1,29 @@
+type: postgresql
+
+version:
+  postgresql: "17"
+
+cluster:
+  instances: 1
+  # https://github.com/tensorchord/cloudnative-vectorchord/pkgs/container/cloudnative-vectorchord
+  imageName: "ghcr.io/tensorchord/cloudnative-vectorchord:17.6"
+
+storage:
+  size: 10Gi
+  storageClass: "local-path"
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 4Gi
+  requests:
+    cpu: 1000m
+    memory: 4Gi
+
+postgresql:
+  shared_preload_libraries:
+    - "vchord.so"
+
+initdb:
+  postInitSQL:
+    - CREATE EXTENSION IF NOT EXISTS vchord CASCADE;
