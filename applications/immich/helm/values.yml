@@ -23,10 +23,3 @@ persistence:
 
 valkey:
   enabled: true
-  persistence:
-    data:
-      enabled: true
-      size: 1Gi
-      type: persistentVolumeClaim
-      accessMode: ReadWriteOnce
-      storageClass: local-path
