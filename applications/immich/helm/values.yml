@@ -3,19 +3,15 @@ controllers:
     containers:
       main:
         env:
-          - name: REDIS_HOSTNAME
-            value: '{{ printf "%s-valkey" .Release.Name }}'
-          - name: IMMICH_MACHINE_LEARNING_URL
-            value: '{{ printf "http://%s-machine-learning:3003" .Release.Name }}'
-          - name: DB_URL
+          REDIS_HOSTNAME: '{{ printf "%s-valkey" .Release.Name }}'
+          IMMICH_MACHINE_LEARNING_URL: '{{ printf "http://%s-machine-learning:3003" .Release.Name }}'
+          DB_URL:
             valueFrom:
               secretKeyRef:
                 name: db-url
                 key: DB_URL
-          - name: DB_VECTOR_EXTENSION
-            value: vectorchord
-          - name: DB_STORAGE_TYPE
-            value: SSD
+          DB_VECTOR_EXTENSION: vectorchord
+          DB_STORAGE_TYPE: SSD
 
 immich:
   library:
