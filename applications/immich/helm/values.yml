@@ -14,5 +14,6 @@ controllers:
           DB_STORAGE_TYPE: SSD
 
 immich:
-  library:
-    existingClaim: immich-media-pvc
+  persistence:
+    library:
+      existingClaim: immich-media-pvc
