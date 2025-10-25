@@ -16,7 +16,3 @@ controllers:
 immich:
   library:
     existingClaim: immich-media-pvc
-
-persistence:
-  cache:
-    storageClass: local-path
