@@ -24,4 +24,5 @@ persistence:
 valkey:
   enabled: true
   persistence:
-    storageClass: local-path
+    data:
+      storageClass: local-path
