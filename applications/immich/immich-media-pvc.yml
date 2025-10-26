@@ -4,7 +4,7 @@ metadata:
   name: immich-media-pvc
 spec:
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   volumeMode: Filesystem
   resources:
     requests:
