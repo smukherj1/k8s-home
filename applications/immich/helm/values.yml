@@ -3,7 +3,7 @@ controllers:
     containers:
       main:
         env:
-          REDIS_HOSTNAME: valkey.valkey.svc.cluster.local
+          REDIS_HOSTNAME: valkey.immich-valkey.svc.cluster.local
           IMMICH_MACHINE_LEARNING_URL: '{{ printf "http://%s-machine-learning:3003" .Release.Name }}'
           DB_URL:
             valueFrom:
