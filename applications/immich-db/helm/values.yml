@@ -6,7 +6,8 @@ version:
 cluster:
   instances: 1
   # https://github.com/tensorchord/cloudnative-vectorchord/pkgs/container/cloudnative-vectorchord
-  imageName: "ghcr.io/tensorchord/cloudnative-vectorchord:17.6"
+  # Immich v2.0.0 only supports Vectorchord >=0.3 <0.5
+  imageName: "ghcr.io/tensorchord/cloudnative-vectorchord:17.5-0.4.3"
 
 storage:
   size: 10Gi
