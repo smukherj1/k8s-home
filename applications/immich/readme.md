@@ -14,3 +14,11 @@ $ kubectl get secret immich-db-cluster-app -n cnpg -o json | jq -r '.data."fqdn-
 ```shell
 kubectl create secret generic db-url -n immich --from-literal=DB_URL=[value from above]
 ```
+
+# Testing Immich Server with Port Forwarning
+
+```shell
+kubectl -n immich port-forward svc/immich-server 8080:2283
+
+ssh -L 8080:localhost:8080 suvanjan@[node ip]
+```
