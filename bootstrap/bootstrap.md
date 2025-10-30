@@ -201,6 +201,12 @@ kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.pas
 1. Create an application in Argo called 'argo' that exposes the Argo CD server to our tailscale tailnet
    using the manifests [here](https://github.com/smukherj1/k8s-home/blob/main/argocd).
 
+## Step 6: Linux AMD GPU Installation
+
+1. GPU Driver installation [instructions](https://www.amd.com/en/support/download/linux-drivers.html).
+
+1. Kubernetes GPU installation [instructions](https://instinct.docs.amd.com/projects/k8s-device-plugin/en/latest/).
+
 ## Uninstalling K3S on a Node
 
 1. Run the uninstallation script created by the k3s installation
