@@ -144,6 +144,27 @@ $ kubectl --namespace=tailscale get all -l app.kubernetes.io/managed-by=Helm
 
 ```
 
+### Step 4a: To Upgrade An Existing Tailscale Operator Installation
+
+```shell
+# List the currently installed Tailscale Chart version
+helm list -n tailscale
+
+# Update the Helm Repo
+helm repo update
+
+# Get the latest available chart versions
+helm search repo tailscale/tailscale-operator --versions
+
+# Upgrade the chart (if a newer version is available).
+helm upgrade \
+  -n tailscale \
+  tailscale-operator \
+  tailscale/tailscale-operator \
+  --wait \
+  --version <new chart version>
+```
+
 ## Step 5: Install Argo CD
 
 1. Following the instructions [here](https://argo-cd.readthedocs.io/en/stable/operator-manual/installation/#non-high-availability) to
