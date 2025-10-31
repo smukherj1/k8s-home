@@ -1,0 +1,34 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: amd-rocm-plugin
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  sources:
+    - chart: amd-gpu
+      repoURL: https://rocm.github.io/k8s-device-plugin/
+      targetRevision: 0.20.0
+      helm:
+        releaseName: amd-gpu
+        valueFiles:
+          - $values/applications/amd-rocm-plugin/helm/values.yml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: amd-rocm-plugin
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      enabled: true
+    syncOptions:
+      - PrunePropagationPolicy=foreground
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m0s
