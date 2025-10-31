@@ -15,6 +15,9 @@ spec:
         releaseName: amd-gpu
         valueFiles:
           - $values/applications/amd-rocm-plugin/helm/values.yml
+    - repoURL: https://github.com/smukherj1/k8s-home.git
+      targetRevision: main
+      ref: values
   destination:
     server: https://kubernetes.default.svc
     namespace: amd-rocm-plugin
