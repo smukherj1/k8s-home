@@ -1,6 +1,6 @@
 # Chart documentation: https://artifacthub.io/packages/helm/amd-gpu-helm/amd-gpu
 nfd:
-  enabled: true
+  enabled: false
 
 labeller:
   enabled: true
