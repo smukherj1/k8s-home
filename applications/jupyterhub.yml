@@ -1,0 +1,40 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: jupyterhub
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  sources:
+    - chart: jupyterhub
+      repoURL: https://hub.jupyter.org/helm-chart/
+      targetRevision: 4.3.1
+      helm:
+        releaseName: jupyterhub
+        valueFiles:
+          - $values/applications/jupyterhub/helm/values.yml
+    - repoURL: https://github.com/smukherj1/k8s-home.git
+      targetRevision: main
+      ref: values
+    - repoURL: https://github.com/smukherj1/k8s-home.git
+      targetRevision: main
+      path: applications/jupyterhub
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: jupyterhub
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      enabled: true
+    syncOptions:
+      - PrunePropagationPolicy=foreground
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m0s
