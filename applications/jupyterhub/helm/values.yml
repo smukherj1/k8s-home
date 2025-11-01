@@ -12,3 +12,10 @@
 proxy:
   service:
     type: ClusterIP
+
+hub:
+  config:
+    JupyterHub:
+      admin_access: true
+      admin_users:
+        - suvanjan
