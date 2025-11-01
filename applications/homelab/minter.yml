@@ -4,9 +4,19 @@ kind: Ingress
 metadata:
   name: homelab
 spec:
+  rules:
+    - http:
+      paths:
+        - pathType: Prefix
+          path: "/admin-token"
+          backend:
+            service:
+              name: admin-minter
+              port:
+                number: 80
   defaultBackend:
     service:
-      name: minter
+      name: admin-minter
       port:
         number: 80
   ingressClassName: tailscale
@@ -17,10 +27,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: minter
+  name: admin-minter
 spec:
   selector:
-    app.kubernetes.io/name: minter
+    app.kubernetes.io/name: admin-minter
   ports:
     - protocol: TCP
       port: 80
@@ -29,22 +39,22 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: minter-deployment
+  name: admin-minter-deployment
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/name: minter
+      app.kubernetes.io/name: admin-minter
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: minter
+        app.kubernetes.io/name: admin-minter
     spec:
       containers:
-      - name: minter
-        image: ghcr.io/smukherj1/homelab-depot/minter:main
-        ports:
-        - containerPort: 8080
+        - name: admin-minter
+          image: ghcr.io/smukherj1/homelab-depot/minter:main
+          ports:
+            - containerPort: 8080
       serviceAccountName: cluster-admin
 ---
 apiVersion: v1
@@ -61,6 +71,6 @@ roleRef:
   kind: ClusterRole
   name: cluster-admin
 subjects:
-- kind: ServiceAccount
-  name: cluster-admin
-  namespace: homelab
+  - kind: ServiceAccount
+    name: cluster-admin
+    namespace: homelab
