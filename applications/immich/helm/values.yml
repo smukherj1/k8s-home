@@ -2,8 +2,9 @@ controllers:
   main:
     containers:
       main:
+        # ghcr.io/immich-app/immich-server
         image:
-          tag: v2.1.0
+          tag: v2.2.1
         env:
           REDIS_HOSTNAME: valkey.immich-valkey.svc.cluster.local
           IMMICH_MACHINE_LEARNING_URL: '{{ printf "http://%s-machine-learning:3003" .Release.Name }}'
