@@ -5,8 +5,7 @@ metadata:
   name: homelab-minter
 spec:
   selector:
-    matchLabels:
-      app: homelab-minter
+    app.kubernetes.io/name: homelab-minter
   ports:
     - protocol: TCP
       port: 80
@@ -16,8 +15,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: homelab-minter
-  labels:
-    app: homelab-minter
 spec:
   replicas: 1
   selector:
