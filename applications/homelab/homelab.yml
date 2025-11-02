@@ -1,25 +1,81 @@
+---
 apiVersion: v1
-kind: Pod
+kind: Service
 metadata:
-  name: nginx
+  name: homelab-minter
 spec:
-  containers:
-    - image: nginx
-      name: nginx
-      volumeMounts:
-        - mountPath: /var/run/secrets/tokens
-          name: token
-  serviceAccountName: suvanjan-homelab
-  volumes:
-    - name: token
-      projected:
-        sources:
-          - serviceAccountToken:
-              path: token
-              expirationSeconds: 3600
-              audience: https://iam.googleapis.com/projects/941738172592/locations/global/workloadIdentityPools/homelab/providers/homelab-kubernetes-cluster
+  selector:
+    matchLabels:
+      app: homelab-minter
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: homelab-minter
+  labels:
+    app: homelab-minter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: homelab-minter
+  template:
+    metadata:
+      labels:
+        app: homelab-minter
+    spec:
+      containers:
+        - image: ghcr.io/smukherj1/homelab-depot/minter:main
+          name: homelab-minter
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+              name: token
+            - mountPath: "/etc/workload-identity"
+              name: gcp-wif-credentials
+              readOnly: true
+          env:
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: "/etc/workload-identity/credentials.json"
+      serviceAccountName: suvanjan-homelab
+      volumes:
+        - name: token
+          projected:
+            sources:
+              - serviceAccountToken:
+                  path: token
+                  expirationSeconds: 3600
+                  audience: https://iam.googleapis.com/projects/941738172592/locations/global/workloadIdentityPools/homelab/providers/homelab-kubernetes-cluster
+        - name: gcp-wif-credentials
+          configMap:
+            name: gcp-wif-credentials
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: suvanjan-homelab
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gcp-wif-credentials
+data:
+  credentials.json: |
+    {
+      "universe_domain": "googleapis.com",
+      "type": "external_account",
+      "audience": "//iam.googleapis.com/projects/941738172592/locations/global/workloadIdentityPools/homelab/providers/homelab-kubernetes-cluster",
+      "subject_token_type": "urn:ietf:params:oauth:token-type:jwt",
+      "token_url": "https://sts.googleapis.com/v1/token",
+      "credential_source": {
+        "file": "/var/run/secrets/kubernetes.io/serviceaccount/token",
+        "format": {
+          "type": "text"
+        }
+      }
+    }

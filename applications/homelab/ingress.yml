@@ -8,10 +8,17 @@ spec:
     - http:
         paths:
           - pathType: Prefix
-            path: "/admin-token"
+            path: "/admin-minter"
             backend:
               service:
                 name: admin-minter
+                port:
+                  number: 80
+          - pathType: Prefix
+            path: "/homelab-minter"
+            backend:
+              service:
+                name: homelab-minter
                 port:
                   number: 80
   defaultBackend:
