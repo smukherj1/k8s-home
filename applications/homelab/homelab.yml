@@ -16,7 +16,7 @@ spec:
         sources:
           - serviceAccountToken:
               path: token
-              expirationSeconds: 600
+              expirationSeconds: 3600
               audience: https://iam.googleapis.com/projects/941738172592/locations/global/workloadIdentityPools/homelab/providers/homelab-kubernetes-cluster
 ---
 apiVersion: v1
