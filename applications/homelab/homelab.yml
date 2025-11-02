@@ -26,7 +26,7 @@ spec:
         app: homelab-minter
     spec:
       containers:
-        - image: ghcr.io/smukherj1/homelab-depot/minter:main
+        - image: ghcr.io/smukherj1/homelab-depot/minter:sha256-91009ba2e6f6d707bb106d3038d20fd83ca4a197927e2a5ba32aeb760928ccd6
           name: homelab-minter
           ports:
             - containerPort: 8080
