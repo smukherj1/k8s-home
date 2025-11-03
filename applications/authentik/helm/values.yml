@@ -1,0 +1,19 @@
+type: postgresql
+
+version:
+  postgresql: "18"
+
+cluster:
+  instances: 1
+  imageName: "ghcr.io/cloudnative-pg/postgresql:18.0-202510270807-system-trixie"
+  storage:
+    size: 10Gi
+    storageClass: "local-path"
+
+  resources:
+    limits:
+      cpu: "1"
+      memory: 4Gi
+    requests:
+      cpu: "1"
+      memory: 4Gi
