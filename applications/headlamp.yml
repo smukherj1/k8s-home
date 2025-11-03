@@ -4,7 +4,7 @@ metadata:
   name: headlamp
   namespace: argocd
   finalizers:
-  - resources-finalizer.argocd.argoproj.io
+    - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   sources:
@@ -14,7 +14,7 @@ spec:
       helm:
         releaseName: headlamp
         valueFiles:
-        - $values/applications/headlamp/helm/values.yml
+          - $values/applications/headlamp/helm/values.yml
     - repoURL: https://github.com/smukherj1/k8s-home.git
       targetRevision: main
       ref: values
@@ -38,3 +38,4 @@ spec:
         duration: 5s
         factor: 2
         maxDuration: 3m0s
+  revisionHistoryLimit: 2

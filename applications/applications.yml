@@ -4,7 +4,7 @@ metadata:
   name: applications
   namespace: argocd
   finalizers:
-  - resources-finalizer.argocd.argoproj.io
+    - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
@@ -28,3 +28,4 @@ spec:
         duration: 5s
         factor: 2
         maxDuration: 3m0s
+  revisionHistoryLimit: 2
