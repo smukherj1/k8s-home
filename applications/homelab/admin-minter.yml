@@ -27,7 +27,7 @@ spec:
     spec:
       containers:
         - name: admin-minter
-          image: ghcr.io/smukherj1/homelab-depot/minter@sha256:91009ba2e6f6d707bb106d3038d20fd83ca4a197927e2a5ba32aeb760928ccd6
+          image: ghcr.io/smukherj1/homelab-depot/minter@sha256:02f56cb3fe238e291bdf8981f185863f450deccd75302583c464ee553126f6c7
           ports:
             - containerPort: 8080
       serviceAccountName: cluster-admin
