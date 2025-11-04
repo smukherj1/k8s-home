@@ -8,11 +8,26 @@ controllers:
         env:
           REDIS_HOSTNAME: valkey
           IMMICH_MACHINE_LEARNING_URL: '{{ printf "http://%s-machine-learning:3003" .Release.Name }}'
-          DB_URL:
+          DB_HOSTNAME:
             valueFrom:
               secretKeyRef:
                 name: immich-db-cluster-superuser
-                key: fqdn-uri
+                key: host
+          DB_USERNAME:
+            valueFrom:
+              secretKeyRef:
+                name: immich-db-cluster-superuser
+                key: username
+          DB_PASSWORD:
+            valueFrom:
+              secretKeyRef:
+                name: immich-db-cluster-superuser
+                key: password
+          DB_DATABASE_NAME:
+            valueFrom:
+              secretKeyRef:
+                name: immich-db-cluster-app
+                key: dbname
           DB_VECTOR_EXTENSION: vectorchord
           DB_STORAGE_TYPE: SSD
 
