@@ -28,6 +28,7 @@ controllers:
               secretKeyRef:
                 name: immich-db-cluster-app
                 key: dbname
+          DB_SSL_MODE: require
           DB_VECTOR_EXTENSION: vectorchord
           DB_STORAGE_TYPE: SSD
 
