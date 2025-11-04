@@ -1,29 +1,29 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: immich-valkey
+  name: immich-db
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   sources:
-    - chart: valkey
-      repoURL: https://valkey.io/valkey-helm/
-      targetRevision: 0.7.5
+    - chart: cluster
+      repoURL: https://cloudnative-pg.github.io/charts
+      targetRevision: 0.3.1
       helm:
-        releaseName: valkey
+        releaseName: immich-db
         valueFiles:
-          - $values/applications/immich-valkey/helm/values.yml
+          - $values/applications/immich-db/helm/values.yml
     - repoURL: https://github.com/smukherj1/k8s-home.git
       targetRevision: main
       ref: values
     - repoURL: https://github.com/smukherj1/k8s-home.git
       targetRevision: main
-      path: applications/immich-valkey
+      path: applications/immich-db
   destination:
     server: "https://kubernetes.default.svc"
-    namespace: immich
+    namespace: cnpg
   syncPolicy:
     automated:
       prune: true

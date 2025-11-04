@@ -1,29 +1,29 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: immich-valkey
+  name: cnpg
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   sources:
-    - chart: valkey
-      repoURL: https://valkey.io/valkey-helm/
-      targetRevision: 0.7.5
+    - chart: cloudnative-pg
+      repoURL: https://cloudnative-pg.github.io/charts
+      targetRevision: 0.26.0
       helm:
-        releaseName: valkey
+        releaseName: cloudnative-pg
         valueFiles:
-          - $values/applications/immich-valkey/helm/values.yml
+          - $values/applications/cnpg/helm/values.yml
     - repoURL: https://github.com/smukherj1/k8s-home.git
       targetRevision: main
       ref: values
     - repoURL: https://github.com/smukherj1/k8s-home.git
       targetRevision: main
-      path: applications/immich-valkey
+      path: applications/cnpg
   destination:
     server: "https://kubernetes.default.svc"
-    namespace: immich
+    namespace: cnpg
   syncPolicy:
     automated:
       prune: true
@@ -32,6 +32,7 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - PrunePropagationPolicy=foreground
+      - ServerSideApply=true
     retry:
       limit: 5
       backoff:

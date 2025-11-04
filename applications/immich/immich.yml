@@ -1,26 +1,26 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: immich-valkey
+  name: immich
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   sources:
-    - chart: valkey
-      repoURL: https://valkey.io/valkey-helm/
-      targetRevision: 0.7.5
+    - chart: immich
+      repoURL: oci://ghcr.io/immich-app/immich-charts/immich
+      targetRevision: 0.10.1
       helm:
-        releaseName: valkey
+        releaseName: immich
         valueFiles:
-          - $values/applications/immich-valkey/helm/values.yml
+          - $values/applications/immich/helm/values.yml
     - repoURL: https://github.com/smukherj1/k8s-home.git
       targetRevision: main
       ref: values
     - repoURL: https://github.com/smukherj1/k8s-home.git
       targetRevision: main
-      path: applications/immich-valkey
+      path: applications/immich
   destination:
     server: "https://kubernetes.default.svc"
     namespace: immich
