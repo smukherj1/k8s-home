@@ -23,7 +23,7 @@ spec:
       path: applications/immich-db
   destination:
     server: "https://kubernetes.default.svc"
-    namespace: cnpg
+    namespace: immich
   syncPolicy:
     automated:
       prune: true
