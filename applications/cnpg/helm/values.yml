@@ -1,6 +1,8 @@
 replicaCount: 1
 
 config:
-  # Scope the cnpg operator to manage cnpg clusters in the same
-  # namespace the operator is running in.
-  clusterWide: false
+  # Scope the cnpg operator to manage cnpg clusters in any
+  # namespace in the Kubernetes cluster. This allows creating
+  # databases in the same namespace as the applications using
+  # them.
+  clusterWide: true
