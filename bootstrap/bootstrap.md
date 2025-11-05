@@ -7,7 +7,7 @@
 1.  Install k3s.
 
 ```shell
-curl -sfL https://get.k3s.io | K3S_KUBECONFIG_MODE="644" sh -s - --disable=traefik --disable=metrics-server --disable=servicelb
+curl -sfL https://get.k3s.io | K3S_KUBECONFIG_MODE="644" sh -s - --disable=traefik --disable=servicelb
 ```
 
 ## Step 2: Enable Graceful Pod Termination on Node Shutdown
@@ -38,7 +38,7 @@ ExecStart=/usr/local/bin/k3s \
         '--disable=traefik' \
         '--disable=metrics-server' \
         '--disable=servicelb' \
-        --kubelet-arg config=/home/<username>/.k3s/kubelet.config \
+        --kubelet-arg config=/home/suvanjan/.k3s/kubelet.config \
 ```
 
 1. Then restart the service and confirm the k3s server is running.

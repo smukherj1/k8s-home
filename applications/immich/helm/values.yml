@@ -1,3 +1,4 @@
+# https://github.com/immich-app/immich-charts
 controllers:
   main:
     containers:
@@ -13,6 +14,9 @@ controllers:
               secretKeyRef:
                 name: immich-db-cluster-superuser
                 key: host
+          # Need superuser because the immich server tries to enable the
+          # vectorchord extension on startup which requires superuser
+          # privileges.
           DB_USERNAME:
             valueFrom:
               secretKeyRef:
