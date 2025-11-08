@@ -26,11 +26,6 @@ server:
         secretKeyRef:
           name: authentik-secrets
           key: secret-key
-  ingress:
-    enabled: true
-    ingressClassName: tailscale
-    hosts:
-      - authentik
 
 worker:
   env:
