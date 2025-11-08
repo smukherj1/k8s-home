@@ -30,7 +30,7 @@ server:
     enabled: true
     ingressClassName: tailscale
     hosts:
-      - authentik.domain.tld
+      - authentik
 
 worker:
   env:
