@@ -1,0 +1,61 @@
+# Reference: https://artifacthub.io/packages/helm/goauthentik/authentik
+server:
+  env:
+    - name: AUTHENTIK_POSTGRESQL__HOST
+      valueFrom:
+        secretKeyRef:
+          name: authentik-db-cluster-app
+          key: host
+    - name: AUTHENTIK_POSTGRESQL__USER
+      valueFrom:
+        secretKeyRef:
+          name: authentik-db-cluster-app
+          key: user
+    - name: AUTHENTIK_POSTGRESQL__PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: authentik-db-cluster-app
+          key: password
+    - name: AUTHENTIK_POSTGRESQL__NAME
+      valueFrom:
+        secretKeyRef:
+          name: authentik-db-cluster-app
+          key: dbname
+    - name: AUTHENTIK_SECRET_KEY
+      valueFrom:
+        secretKeyRef:
+          name: authentik-secrets
+          key: secret-key
+  ingress:
+    enabled: true
+    ingressClassName: tailscale
+    hosts:
+      - authentik.domain.tld
+
+worker:
+  env:
+    - name: AUTHENTIK_POSTGRESQL__HOST
+      valueFrom:
+        secretKeyRef:
+          name: authentik-db-cluster-app
+          key: host
+    - name: AUTHENTIK_POSTGRESQL__USER
+      valueFrom:
+        secretKeyRef:
+          name: authentik-db-cluster-app
+          key: user
+    - name: AUTHENTIK_POSTGRESQL__PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: authentik-db-cluster-app
+          key: password
+    - name: AUTHENTIK_POSTGRESQL__NAME
+      valueFrom:
+        secretKeyRef:
+          name: authentik-db-cluster-app
+          key: dbname
+    - name: AUTHENTIK_SECRET_KEY
+      valueFrom:
+        secretKeyRef:
+          name: authentik-secrets
+          key: secret-key

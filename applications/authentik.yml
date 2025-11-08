@@ -1,0 +1,41 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: authentik
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  sources:
+    - chart: authentik
+      repoURL: https://charts.goauthentik.io
+      targetRevision: 2025.10.1
+      helm:
+        releaseName: authentik
+        valueFiles:
+          - $values/applications/authentik/helm/values.yml
+    - repoURL: https://github.com/smukherj1/k8s-home.git
+      targetRevision: main
+      ref: values
+    - repoURL: https://github.com/smukherj1/k8s-home.git
+      targetRevision: main
+      path: applications/authentik
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: authentik
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      enabled: true
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m0s
+  revisionHistoryLimit: 2
