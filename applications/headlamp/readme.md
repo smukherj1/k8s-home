@@ -14,8 +14,8 @@ CLIENT_SECRET=""
 ISSUER_URL=""
 kubectl -n headlamp create secret generic \
     headlamp-oidc-secrets \
-    --from-literal=clientID=${CLIENT_ID} \
-    --from-literal=clientSecret=${CLIENT_SECRET} \
-    --from-literal=issuerURL=${ISSUER_URL} \
-    --from-literal=scopes="openid profile email"
+    --from-literal=OIDC_CLIENT_ID=${CLIENT_ID} \
+    --from-literal=OIDC_CLIENT_SECRET=${CLIENT_SECRET} \
+    --from-literal=OIDC_ISSUER_URL=${ISSUER_URL} \
+    --from-literal=OIDC_SCOPES="openid profile email"
 ```
