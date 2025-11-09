@@ -1,1 +1,9 @@
 # https://artifacthub.io/packages/helm/headlamp/headlamp
+
+config:
+  oidc:
+    secret:
+      create: false
+    externalSecret:
+      enabled: true
+      name: headlamp-oidc-secrets
