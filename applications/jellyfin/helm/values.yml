@@ -6,3 +6,21 @@ persistence:
     type: hostPath
     # -- Path on the host node for media storage, only used if type is 'hostPath'.
     hostPath: /home/suvanjan/jellyfin/media
+
+# Enabling HW transcoding support.
+securityContext:
+  capabilities:
+    add:
+      - "SYS_ADMIN"
+    drop:
+      - "ALL"
+  privileged: false
+
+extraVolumes:
+  - name: hwa
+    hostPath:
+      path: /dev/dri
+
+extraVolumeMounts:
+  - name: hwa
+    mountPath: /dev/dri
