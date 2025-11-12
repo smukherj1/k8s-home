@@ -10,7 +10,7 @@ spec:
   sources:
     - chart: headlamp
       repoURL: https://kubernetes-sigs.github.io/headlamp/
-      targetRevision: 0.37.0
+      targetRevision: 0.38.0
       helm:
         releaseName: headlamp
         valueFiles:
