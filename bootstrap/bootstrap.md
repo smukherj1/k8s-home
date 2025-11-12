@@ -175,7 +175,7 @@ helm upgrade \
 # If updating versions, also update the version in the install.yaml link in
 # the @/argocd/kustomization.yml where @ is the repo root.
 kubectl create namespace argocd
-kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/v3.1.9/manifests/install.yaml
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/v3.2.0/manifests/install.yaml
 ```
 
 1. Use port forwarding and ssh tunneling to access the Argo CD UI for now
