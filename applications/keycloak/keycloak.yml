@@ -20,3 +20,5 @@ spec:
     hostname: keycloak.suvanjanlabs.com
   proxy:
     headers: xforwarded
+  ingress:
+    enabled: false
