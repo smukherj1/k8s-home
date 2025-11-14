@@ -12,3 +12,11 @@ kubectl -n keycloak create secret tls keycloak-tls-secret --cert certificate.pem
 
 rm certificate.pem key.pem
 ```
+
+# Cloudflare Tunnel Setup
+
+```shell
+CLOUDFLARE_TUNNEL_TOKEN=""
+
+kubectl -n keycloak create secret generic cloudflare-tunnel-secrets --from-literal=token=${CLOUDFLARE_TUNNEL_TOKEN}
+```
