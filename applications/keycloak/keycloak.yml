@@ -1,0 +1,22 @@
+apiVersion: k8s.keycloak.org/v2alpha1
+kind: Keycloak
+metadata:
+  name: keycloak
+spec:
+  instances: 1
+  db:
+    vendor: postgres
+    host: keycloak-db-cluster-rw
+    database: app
+    usernameSecret:
+      name: keycloak-db-cluster-app
+      key: username
+    passwordSecret:
+      name: keycloak-db-cluster-app
+      key: password
+  http:
+    tlsSecret: keycloak-tls-secret
+  hostname:
+    hostname: keycloak.suvanjanlabs.com
+  proxy:
+    headers: xforwarded
