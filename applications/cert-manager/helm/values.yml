@@ -1,0 +1,7 @@
+# https://artifacthub.io/packages/helm/cert-manager/cert-manager
+
+crds:
+  enabled: true
+  # Delete CRDs and in turn certificates when cert-manager is
+  # uninstalled.
+  keep: false
