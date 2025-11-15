@@ -15,7 +15,7 @@ spec:
       name: keycloak-db-cluster-app
       key: password
   http:
-    tlsSecret: keycloak-tls-secret
+    tlsSecret: tls-secret
   hostname:
     hostname: keycloak.suvanjanlabs.com
   proxy:
