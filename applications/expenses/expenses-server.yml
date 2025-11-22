@@ -47,5 +47,10 @@ spec:
                   key: better-auth-secret
             - name: BETTER_AUTH_URL
               value: "https://expenses.tailea3b9d.ts.net"
+            - name: KEYCLOAK_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: expenses-secrets
+                  key: keycloak-client-secret
 
   
