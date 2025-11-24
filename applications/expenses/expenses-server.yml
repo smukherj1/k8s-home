@@ -29,7 +29,7 @@ spec:
     spec:
       containers:
         - name: expenses-server
-          image: ghcr.io/smukherj1/expenses-v2@sha256:1b378fddef30122f0d50ac58e3add3f50d46b1bdd066ae03f0536c50e999ef36
+          image: ghcr.io/smukherj1/expenses-v2@sha256:4848de4d91c4eb9b168d4f708c5232a3d0cc7a0d994dc1f8d8e3aca8c77f3bcf
           ports:
             - containerPort: 3000
           env:
