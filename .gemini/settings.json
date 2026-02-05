@@ -1,0 +1,22 @@
+{
+    "mcpServers": {
+        "helm-charts": {
+            "command": "docker",
+            "args": [
+                "run",
+                "-i",
+                "--name",
+                "mcp-helm",
+                "--rm",
+                "ghcr.io/zekker6/mcp-helm:v1.0.6",
+                "--mode=stdio"
+            ]
+        },
+        "github": {
+            "httpUrl": "https://api.githubcopilot.com/mcp/",
+            "headers": {
+                "Authorization": "Bearer $GITHUB_MCP_PAT"
+            }
+        }
+    }
+}
