@@ -4,6 +4,7 @@ import sys
 import re
 import requests
 import yaml
+import os
 from packaging.version import Version, InvalidVersion
 
 def die(msg):
@@ -46,12 +47,15 @@ def latest_from_oci_repo(oci_url: str, chart: str) -> str:
         repo = repo.rstrip("/") + "/" + chart
 
     tags_url = f"https://{registry}/v2/{repo}/tags/list"
+    headers = {}
+    if registry == "ghcr.io":
+        headers["Authorization"] = "Bearer " + os.getenv("GITHUB_BASIC_AUTH")
 
-    r = requests.get(tags_url, timeout=10)
+    r = requests.get(tags_url, timeout=10, headers=headers)
     if r.status_code == 404:
         die(f"OCI repo not found: {repo}")
     if r.status_code != 200:
-        die(f"failed to fetch tags from {tags_url} ({r.status_code})")
+        die(f"failed to fetch tags from {tags_url} ({r.status_code}): {r.text}")
 
     tags = r.json().get("tags", [])
     if not tags:
