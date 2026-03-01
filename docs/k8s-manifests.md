@@ -31,7 +31,7 @@ The script will:
 
 ## Technical Documentation: Helm Update Scripts
 
-The update process is powered by two Python scripts.
+The update process is powered by two Python scripts. `uv` is used to manage the dependencies of these scripts.
 
 ### `scripts/update-helm-versions.py`
 

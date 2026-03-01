@@ -5,9 +5,23 @@ import sys
 import argparse
 import subprocess
 from ruamel.yaml import YAML
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional, Any
+from pydantic import BaseModel, validate_call
 
-def get_latest_version(repo_url: str, chart: str) -> str:
+class HelmChartSource(BaseModel):
+    """Information about a Helm chart source in an ArgoCD manifest."""
+    repo_url: str
+    chart: str
+    target_revision: str
+    path: List[Any]  # The path of keys/indices to reach targetRevision in the YAML data
+
+class UpdateManifestTask(BaseModel):
+    """A collection of Helm chart sources within a single manifest file that may need updates."""
+    filename: str
+    sources: List[HelmChartSource]
+
+@validate_call
+def get_latest_version(repo_url: str, chart: str) -> Optional[str]:
     """Calls scripts/helm-latest-version.py to get the latest version."""
     script_path = os.path.join(os.path.dirname(__file__), "helm-latest-version.py")
     try:
@@ -22,6 +36,145 @@ def get_latest_version(repo_url: str, chart: str) -> str:
         print(f"Error getting latest version for {chart} at {repo_url}: {e.stderr}", file=sys.stderr)
         return None
 
+@validate_call
+def extract_helm_sources_from_spec(spec: dict) -> List[Tuple[dict, List[Any]]]:
+    """
+    Extracts Helm sources and their access paths from an ArgoCD spec.
+    'spec' is the 'spec' field of an ArgoCD Application manifest YAML.
+    Returns a list of (source_dict, path_to_target_revision).
+    """
+    sources_data = spec.get('sources', [])
+    # ArgoCD can have single 'source' or multiple 'sources'
+    if not sources_data and 'source' in spec:
+        sources_data = [spec['source']]
+        base_path = ['spec', 'source']
+        is_multiple = False
+    else:
+        base_path = ['spec', 'sources']
+        is_multiple = True
+
+    found = []
+    for i, source in enumerate(sources_data):
+        if source.get('repoURL') and source.get('chart') and source.get('targetRevision'):
+            path = base_path + ([i, 'targetRevision'] if is_multiple else ['targetRevision'])
+            found.append((source, path))
+    return found
+
+@validate_call
+def get_chart_update_info(filename: str, data: dict) -> Optional[UpdateManifestTask]:
+    """
+    Extracts update information from an ArgoCD Application manifest.
+    'data' is the entire ArgoCD Application manifest YAML.
+    """
+    if not data or data.get('kind') != 'Application':
+        return None
+
+    spec = data.get('spec', {})
+    helm_sources = extract_helm_sources_from_spec(spec)
+    
+    sources = [
+        HelmChartSource(
+            repo_url=s['repoURL'],
+            chart=s['chart'],
+            target_revision=s['targetRevision'],
+            path=p
+        )
+        for s, p in helm_sources
+    ]
+
+    if not sources:
+        return None
+
+    return UpdateManifestTask(filename=filename, sources=sources)
+
+@validate_call
+def collect_tasks(directory: str, yaml_loader: YAML) -> List[UpdateManifestTask]:
+    """Scans the directory for manifests and collects update tasks."""
+    tasks = []
+    if not os.path.isdir(directory):
+        print(f"Error: Directory {directory} does not exist.", file=sys.stderr)
+        return tasks
+
+    for filename in sorted(os.listdir(directory)):
+        if not (filename.endswith(".yml") or filename.endswith(".yaml")):
+            continue
+        
+        filepath = os.path.join(directory, filename)
+        if not os.path.isfile(filepath):
+            continue
+
+        with open(filepath, 'r') as f:
+            try:
+                data = yaml_loader.load(f)
+                task = get_chart_update_info(filename, data)
+                if task:
+                    tasks.append(task)
+            except Exception as e:
+                # Use standard print for errors to match previous behavior
+                print(f"Warning: Failed to parse {filename}: {e}", file=sys.stderr)
+    
+    return tasks
+
+@validate_call
+def fetch_latest_versions(tasks: List[UpdateManifestTask]) -> Dict[Tuple[str, str], str]:
+    """Fetches the latest versions for all unique charts found in tasks.
+    Returns a dictionary mapping (repo_url, chart) to the latest version.
+    """
+    unique_charts = set((s.repo_url, s.chart) for t in tasks for s in t.sources)
+    
+    latest_versions = {}
+    print(f"Checking for updates for {len(unique_charts)} unique Helm charts...")
+    for repo_url, chart in sorted(unique_charts):
+        latest = get_latest_version(repo_url, chart)
+        if latest:
+            latest_versions[(repo_url, chart)] = latest
+    return latest_versions
+
+@validate_call
+def apply_updates(directory: str, tasks: List[UpdateManifestTask], latest_versions: Dict[Tuple[str, str], str], dry_run: bool, yaml_loader: YAML):
+    """Applies the updates to the manifest files.
+    'directory' is the directory containing the manifests.
+    'tasks' is a list of ArgoCD Application manifests being updated. Not all of them may actually have updates.
+    'latest_versions' is a dictionary mapping (repo_url, chart) to the latest version.
+    'dry_run' is a boolean indicating whether to dry run the updates.
+    'yaml_loader' is a YAML loader object.
+    """
+    # Track which files need saving to avoid multiple writes
+    pending_updates: Dict[str, dict] = {}
+
+    for task in tasks:
+        filepath = os.path.join(directory, task.filename)
+        
+        for source in task.sources:
+            latest = latest_versions.get((source.repo_url, source.chart))
+            if not latest or source.target_revision == latest:
+                continue
+
+            print(f"{task.filename}: Update {source.chart} from {source.target_revision} to {latest}")
+            
+            if task.filename not in pending_updates:
+                with open(filepath, 'r') as f:
+                    pending_updates[task.filename] = yaml_loader.load(f)
+            
+            # Navigate and update
+            data = pending_updates[task.filename]
+            for part in source.path[:-1]:
+                data = data[part]
+            data[source.path[-1]] = latest
+
+    if not dry_run:
+        for filename, data in pending_updates.items():
+            filepath = os.path.join(directory, filename)
+            with open(filepath, 'w') as f:
+                yaml_loader.dump(data, f)
+            print(f"Updated {filename}")
+    
+    if pending_updates:
+        if dry_run:
+            print("\nDry run completed. No files were modified.")
+    else:
+        print("\nAll charts are up to date.")
+
 def main():
     parser = argparse.ArgumentParser(description="Update Helm chart versions in ArgoCD manifests.")
     parser.add_argument("--dry-run", action="store_true", help="Print updates without modifying files.")
@@ -32,97 +185,13 @@ def main():
     yaml.preserve_quotes = True
     yaml.indent(mapping=2, sequence=4, offset=2)
 
-    manifest_files = [f for f in os.listdir(args.dir) if f.endswith(".yml") and os.path.isfile(os.path.join(args.dir, f))]
-    
-    # Collect unique helm chart details
-    # Map (repoURL, chart) -> current_versions (list of (file, path_to_revision))
-    charts_to_update: Dict[Tuple[str, str], List[Tuple[str, List[str]]]] = {}
-
-    for filename in manifest_files:
-        filepath = os.path.join(args.dir, filename)
-        with open(filepath, 'r') as f:
-            try:
-                data = yaml.load(f)
-            except Exception as e:
-                print(f"Warning: Failed to parse {filename}: {e}", file=sys.stderr)
-                continue
-
-            if not data or data.get('kind') != 'Application':
-                continue
-
-            spec = data.get('spec', {})
-            sources = spec.get('sources', [])
-            
-            # ArgoCD can have single 'source' or multiple 'sources'
-            if not sources and 'source' in spec:
-                sources = [spec['source']]
-
-            for i, source in enumerate(sources):
-                repo_url = source.get('repoURL')
-                chart = source.get('chart')
-                target_revision = source.get('targetRevision')
-
-                if repo_url and chart and target_revision:
-                    key = (repo_url, chart)
-                    if key not in charts_to_update:
-                        charts_to_update[key] = []
-                    
-                    # Store where to find this revision
-                    # For multiple sources, it's spec.sources[i].targetRevision
-                    # For single source, it's spec.source.targetRevision
-                    if 'sources' in spec:
-                        path = ['spec', 'sources', i, 'targetRevision']
-                    else:
-                        path = ['spec', 'source', 'targetRevision']
-                    
-                    charts_to_update[key].append((filename, path, target_revision))
-    print(f"Found {charts_to_update}")
-    if not charts_to_update:
+    tasks = collect_tasks(args.dir, yaml)
+    if not tasks:
         print("No Helm charts found to update.")
         return
 
-    # Find latest versions
-    latest_versions: Dict[Tuple[str, str], str] = {}
-    print(f"Checking for updates for {len(charts_to_update)} unique Helm charts...")
-    for (repo_url, chart) in charts_to_update.keys():
-        latest = get_latest_version(repo_url, chart)
-        if latest:
-            latest_versions[(repo_url, chart)] = latest
-
-    # Update files
-    files_to_update = {} # filename -> data
-
-    for (repo_url, chart), targets in charts_to_update.items():
-        latest = latest_versions.get((repo_url, chart))
-        if not latest:
-            continue
-
-        for filename, path, current in targets:
-            # Simple semver check (optional, but good for OCI tags with 'v' prefix)
-            if current != latest:
-                print(f"{filename}: Update {chart} from {current} to {latest}")
-                
-                if filename not in files_to_update:
-                    filepath = os.path.join(args.dir, filename)
-                    with open(filepath, 'r') as f:
-                        files_to_update[filename] = yaml.load(f)
-                
-                # Navigate to the targetRevision in the data
-                curr_data = files_to_update[filename]
-                for part in path[:-1]:
-                    curr_data = curr_data[part]
-                curr_data[path[-1]] = latest
-
-    if not args.dry_run:
-        for filename, data in files_to_update.items():
-            filepath = os.path.join(args.dir, filename)
-            with open(filepath, 'w') as f:
-                yaml.dump(data, f)
-            print(f"Updated {filename}")
-    elif files_to_update:
-        print("\nDry run completed. No files were modified.")
-    else:
-        print("\nAll charts are up to date.")
+    latest_versions = fetch_latest_versions(tasks)
+    apply_updates(args.dir, tasks, latest_versions, args.dry_run, yaml)
 
 if __name__ == "__main__":
     main()
