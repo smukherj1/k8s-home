@@ -17,7 +17,9 @@ class HelmChartSource(BaseModel):
 
 class UpdateManifestTask(BaseModel):
     """A collection of Helm chart sources within a single manifest file that may need updates."""
+    # The name of the manifest file (not the full path)
     filename: str
+    # The list of Helm chart sources in the manifest.
     sources: List[HelmChartSource]
 
 @validate_call
