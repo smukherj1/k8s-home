@@ -139,7 +139,8 @@ def apply_updates(directory: str, tasks: List[UpdateManifestTask], latest_versio
     'dry_run' is a boolean indicating whether to dry run the updates.
     'yaml_loader' is a YAML loader object.
     """
-    # Track which files need saving to avoid multiple writes
+    # Track which files need saving to avoid multiple writes.
+    # Mapping from (filename) -> (updated YAML data)
     pending_updates: Dict[str, dict] = {}
 
     for task in tasks:
@@ -156,7 +157,8 @@ def apply_updates(directory: str, tasks: List[UpdateManifestTask], latest_versio
                 with open(filepath, 'r') as f:
                     pending_updates[task.filename] = yaml_loader.load(f)
             
-            # Navigate and update
+            # Use the source.path to navigate to the targetRevision field in the pending_update data
+            # and set it to the latest version.
             data = pending_updates[task.filename]
             for part in source.path[:-1]:
                 data = data[part]
