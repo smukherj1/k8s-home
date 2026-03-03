@@ -1,14 +1,7 @@
-#!/usr/bin/env python3
-
-import sys
-import re
+import os
 import requests
 import yaml
-import os
 from packaging.version import Version, InvalidVersion
-
-def die(msg):
-    raise RuntimeError(msg)
 
 def is_oci(url: str) -> bool:
     return url.startswith("oci://")
@@ -18,17 +11,17 @@ def latest_from_http_repo(repo_url: str, chart: str) -> str:
 
     r = requests.get(index_url, timeout=10)
     if r.status_code != 200:
-        die(f"failed to fetch index.yaml from {index_url}")
+        raise RuntimeError(f"failed to fetch index.yaml from {index_url}")
 
     index = yaml.safe_load(r.text)
     entries = index.get("entries", {})
 
     if chart not in entries:
-        die(f"chart '{chart}' not found in repo")
+        raise RuntimeError(f"chart '{chart}' not found in repo")
 
     versions = entries[chart]
     if not versions:
-        die(f"no versions found for chart '{chart}'")
+        raise RuntimeError(f"no versions found for chart '{chart}'")
 
     # Helm spec: newest first
     return versions[0]["version"]
@@ -38,7 +31,7 @@ def latest_from_oci_repo(oci_url: str, chart: str) -> str:
     parts = ref.split("/", 1)
 
     if len(parts) != 2:
-        die("invalid OCI repo URL")
+        raise RuntimeError("invalid OCI repo URL")
 
     registry, repo = parts
 
@@ -53,13 +46,13 @@ def latest_from_oci_repo(oci_url: str, chart: str) -> str:
 
     r = requests.get(tags_url, timeout=10, headers=headers)
     if r.status_code == 404:
-        die(f"OCI repo not found: {repo}")
+        raise RuntimeError(f"OCI repo not found: {repo}")
     if r.status_code != 200:
-        die(f"failed to fetch tags from {tags_url} ({r.status_code}): {r.text}")
+        raise RuntimeError(f"failed to fetch tags from {tags_url} ({r.status_code}): {r.text}")
 
     tags = r.json().get("tags", [])
     if not tags:
-        die("no tags found")
+        raise RuntimeError("no tags found")
 
     versions = []
     for tag in tags:
@@ -72,25 +65,14 @@ def latest_from_oci_repo(oci_url: str, chart: str) -> str:
             pass
 
     if not versions:
-        die("no semver-compatible tags found")
+        raise RuntimeError("no semver-compatible tags found")
 
     versions.sort(reverse=True)
     return versions[0][1]
 
-def main():
-    if len(sys.argv) != 3:
-        print("usage: helm-latest-version <repo-url> <chart-name>", file=sys.stderr)
-        sys.exit(2)
-
-    repo_url = sys.argv[1]
-    chart = sys.argv[2]
-
+def get_latest_version(repo_url: str, chart: str) -> str:
+    """Fetches the latest version for a given Helm chart and repo URL."""
     if is_oci(repo_url):
-        version = latest_from_oci_repo(repo_url, chart)
+        return latest_from_oci_repo(repo_url, chart)
     else:
-        version = latest_from_http_repo(repo_url, chart)
-
-    print(version)
-
-if __name__ == "__main__":
-    main()
+        return latest_from_http_repo(repo_url, chart)

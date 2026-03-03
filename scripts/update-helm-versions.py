@@ -1,12 +1,11 @@
-#!/usr/bin/env python3
-
 import os
 import sys
 import argparse
 import subprocess
 from ruamel.yaml import YAML
 from typing import Dict, List, Tuple, Optional, Any
-from pydantic import BaseModel, validate_call
+from pydantic import BaseModel, validate_call, InstanceOf
+from lib.helm import get_latest_version as fetch_chart_latest_version
 
 class HelmChartSource(BaseModel):
     """Information about a Helm chart source in an ArgoCD manifest."""
@@ -24,18 +23,11 @@ class UpdateManifestTask(BaseModel):
 
 @validate_call
 def get_latest_version(repo_url: str, chart: str) -> Optional[str]:
-    """Calls scripts/helm-latest-version.py to get the latest version."""
-    script_path = os.path.join(os.path.dirname(__file__), "helm-latest-version.py")
+    """Fetches the latest version using the helm library."""
     try:
-        result = subprocess.run(
-            ["uv", "run", script_path, repo_url, chart],
-            capture_output=True,
-            text=True,
-            check=True
-        )
-        return result.stdout.strip()
-    except subprocess.CalledProcessError as e:
-        print(f"Error getting latest version for {chart} at {repo_url}: {e.stderr}", file=sys.stderr)
+        return fetch_chart_latest_version(repo_url, chart)
+    except Exception as e:
+        print(f"Error getting latest version for {chart} at {repo_url}: {e}", file=sys.stderr)
         return None
 
 @validate_call
@@ -90,7 +82,7 @@ def get_chart_update_info(filename: str, data: dict) -> Optional[UpdateManifestT
     return UpdateManifestTask(filename=filename, sources=sources)
 
 @validate_call
-def collect_tasks(directory: str, yaml_loader: YAML) -> List[UpdateManifestTask]:
+def collect_tasks(directory: str, yaml_loader: InstanceOf[YAML]) -> List[UpdateManifestTask]:
     """Scans the directory for manifests and collects update tasks."""
     tasks = []
     if not os.path.isdir(directory):
@@ -132,8 +124,9 @@ def fetch_latest_versions(tasks: List[UpdateManifestTask]) -> Dict[Tuple[str, st
             latest_versions[(repo_url, chart)] = latest
     return latest_versions
 
+
 @validate_call
-def apply_updates(directory: str, tasks: List[UpdateManifestTask], latest_versions: Dict[Tuple[str, str], str], dry_run: bool, yaml_loader: YAML):
+def apply_updates(directory: str, tasks: List[UpdateManifestTask], latest_versions: Dict[Tuple[str, str], str], dry_run: bool, yaml_loader: InstanceOf[YAML]):
     """Applies the updates to the manifest files.
     'directory' is the directory containing the manifests.
     'tasks' is a list of ArgoCD Application manifests being updated. Not all of them may actually have updates.

@@ -35,27 +35,21 @@ The update process is powered by two Python scripts. `uv` is used to manage the 
 
 ### `scripts/update-helm-versions.py`
 
-This is the main orchestrator script. It handles the I/O and manifest manipulation.
+This is the main orchestrator script. It handles the I/O, manifest manipulation, and queries the latest version of Helm charts.
 
 - **Manifest Parsing**: It uses `ruamel.yaml` to parse and write YAML files. This preserves
   comments, quotes, and block styles, ensuring that the automated updates don't create "noisy" diffs in Git.
 - **Chart Discovery**: It scans both `spec.source` and `spec.sources` in ArgoCD Application manifests,
   supporting both single-source and multi-source configurations.
-- **Coordination**: It identifies unique chart/repo pairs and calls `helm-latest-version.py` for each to avoid
-  redundant network calls.
-
-### `scripts/helm-latest-version.py`
-
-Queries the latest version of a specific chart.
-
-- **Repository Support**:
-    - **Standard HTTP**: Fetches and parses the `index.yaml` from traditional Helm repositories.
-    - **OCI Registry**: Uses the Docker Distribution API v2 (`tags/list` endpoint) to query versions from
-      registries like `ghcr.io` or `public.ecr.aws`.
-- **Version Selection**: 
-    - It uses the `packaging.version` library to parse tags.
-    - It automatically filters out pre-releases, alpha, beta, and release candidates to ensure only stable
-      versions are suggested.
-    - Tags are sorted according to SemVer rules to determine the "latest".
-- **Authentication**: For GitHub Container Registry (`ghcr.io`), it supports using a `GITHUB_BASIC_AUTH`
-  environment variable to handle rate limits or private repositories.
+- **Latest Version Discovery**: It uses the `scripts/lib/helm.py` library to query latest versions.
+    - **Repository Support**:
+        - **Standard HTTP**: Fetches and parses the `index.yaml` from traditional Helm repositories.
+        - **OCI Registry**: Uses the Docker Distribution API v2 (`tags/list` endpoint) to query versions from
+          registries like `ghcr.io` or `public.ecr.aws`.
+    - **Version Selection**: 
+        - It uses the `packaging.version` library to parse tags.
+        - It automatically filters out pre-releases, alpha, beta, and release candidates to ensure only stable
+          versions are suggested.
+        - Tags are sorted according to SemVer rules to determine the "latest".
+    - **Authentication**: For GitHub Container Registry (`ghcr.io`), it supports using a `GITHUB_BASIC_AUTH`
+      environment variable to handle rate limits or private repositories.
