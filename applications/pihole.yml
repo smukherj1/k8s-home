@@ -4,17 +4,17 @@ metadata:
   name: pihole
   namespace: argocd
   finalizers:
-  - resources-finalizer.argocd.argoproj.io
+    - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   sources:
     - chart: pihole
       repoURL: https://mojo2600.github.io/pihole-kubernetes/
-      targetRevision: 2.34.0
+      targetRevision: 2.35.0
       helm:
         releaseName: pihole
         valueFiles:
-        - $values/applications/pihole/helm/values.yml
+          - $values/applications/pihole/helm/values.yml
     - repoURL: https://github.com/smukherj1/k8s-home.git
       targetRevision: main
       ref: values
