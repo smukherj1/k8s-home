@@ -10,7 +10,7 @@ spec:
   sources:
     - chart: valkey
       repoURL: https://valkey.io/valkey-helm/
-      targetRevision: 0.9.4
+      targetRevision: 0.12.0
       helm:
         releaseName: valkey
         valueFiles:
