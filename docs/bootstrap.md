@@ -49,7 +49,7 @@ sudo systemctl restart k3s
 sudo systemctl status k3s
 ```
 
-## Step 5: Install Helm
+## Step 3: Install Helm
 
 1. Tell Helm about the custom location of the k3s kubeconfig file by adding the following
    to `~/.bashrc`.
