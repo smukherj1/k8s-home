@@ -1,0 +1,17 @@
+# Passwordless sudo for the Hermes agent running as suvanjan.
+# Arguments in ^...$ are regular expressions (sudo 1.9.10+). Package and
+# unit names must start with a letter or digit, so options such as
+# "-o DPkg::Pre-Invoke=..." or "--root=..." cannot be smuggled in.
+
+Cmnd_Alias HERMES_POWER = /usr/bin/systemctl reboot, \
+                          /usr/bin/systemctl poweroff
+
+Cmnd_Alias HERMES_SVC   = /usr/bin/systemctl ^(start|stop|restart|reload|enable|disable) [a-zA-Z0-9][a-zA-Z0-9@._-]*( [a-zA-Z0-9][a-zA-Z0-9@._-]*)*$
+
+Cmnd_Alias HERMES_APT   = /usr/bin/apt update, \
+                          /usr/bin/apt ^upgrade( -y)?$, \
+                          /usr/bin/apt ^autoremove( -y)?$, \
+                          /usr/bin/apt ^(install|remove|purge)( -y)? [a-z0-9][a-z0-9.+-]*( [a-z0-9][a-z0-9.+-]*)*$
+
+suvanjan ALL=(root) NOPASSWD: HERMES_POWER, HERMES_SVC, HERMES_APT
+
