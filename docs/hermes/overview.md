@@ -12,42 +12,37 @@ This document is the entry point. The details are split across:
 
 ## Why Hermes Is Not in Kubernetes
 
-Everything else in this repository is reconciled into the cluster by Argo CD. Hermes deliberately is not, for three
-reasons:
+Everything else in this repository is reconciled into the cluster by Argo CD. Hermes deliberately is not.
 
-1. **Recovery must not depend on what is being repaired.** Hermes is the thing that diagnoses the cluster, edits the
-   manifests, and opens the pull request. Running it inside the cluster would make cluster or Argo CD breakage also
-   break the tool used to fix it.
-2. **It needs node-local context.** The agent works directly in `/home/suvanjan/depot/k8s-home`, reads
-   `/etc/rancher/k3s/k3s.yaml`, and shells out to `kubectl`, `helm`, and `git`. Mounting the host kubeconfig and a
-   writable repo checkout into a pod would be more privileged and less inspectable than a user service.
-3. **Restart semantics.** An agent turn is a long-lived, stateful process (running tool calls, pending approvals). A
-   pod restart, eviction, or node drain would cut it mid-turn; a systemd unit with `Restart=always` gives one
-   predictable restart policy and a single place to look.
+The reason is scope: Hermes administers **the machine**, not just the cluster. It runs `apt`, controls systemd
+services, reboots the host, and edits the manifests that Argo CD reconciles. Putting it inside the cluster would put
+the tool that repairs the cluster under the control of the cluster — a broken k3s, a starving node, or a wedged
+Argo CD would take the agent down with it, at exactly the moment it is needed. A host-level systemd **user** service
+depends on none of that.
 
 The trade-off: **Hermes is not declarative**. Its configuration is not in this repo and not reconciled by Argo CD.
-Drift is possible, and everything it depends on is only as recoverable as the manual backup procedure in
-[operations.md](operations.md#backup-and-restore).
+Drift is possible; recovery is the backup and restore procedure in [operations.md](operations.md#backup-and-restore),
+and the rebuild in [rebuild.md](rebuild.md).
 
 ## Runtime Inventory
 
 Single profile (`default`), one gateway process, no cron jobs.
 
+All of the agent's *state* — settings, `.env`, skills, plugins, memory, session history — lives under
+`~/.hermes` (`HERMES_HOME`) and is captured by `hermes backup`; that is the whole backup story and it is not
+re-listed here. The only parts of the install a backup does not cover:
+
 | Component | Location | Notes |
 |---|---|---|
-| Agent install | `~/.hermes/hermes-agent` | git checkout, ~1.1 GB, updated by `hermes update` |
-| Hermes home | `~/.hermes` (`HERMES_HOME`) | all state below |
-| Settings | `~/.hermes/config.yaml` | plain YAML, edited with `hermes config set` |
-| Secrets | `~/.hermes/.env` | tokens and keys only |
-| Session history | `~/.hermes/state.db` | SQLite + FTS5 (~5 MB) |
-| Logs | `~/.hermes/logs/` | `gateway.log`, `agent.log`, `errors.log` |
-| Skills | `~/.hermes/skills/` | ~45 skills in 13 categories |
-| Plugins | `~/.hermes/plugins/` | `github_app` |
-| Git credential helper | `~/.hermes/bin/git-credential-github-app.py` | mints short-lived App tokens |
-| Service unit | `~/.config/systemd/user/hermes-gateway.service` | `Restart=always`, `RestartSec=5` |
+| Agent install | `~/.hermes/hermes-agent` | git checkout, ~1.1 GB; re-created by the installer and moved by `hermes update`, so not part of a backup |
+| Service unit | `~/.config/systemd/user/hermes-gateway.service` | re-created by `hermes gateway install` |
 
 The unit is a *user* unit, and lingering is enabled (`loginctl show-user <user> -p Linger` → `yes`), so the gateway
 starts at boot without a login session and survives logout.
+
+Outside `~/.hermes` entirely, the only machine-level grant the agent relies on is the passwordless-sudo drop-in at
+`/etc/sudoers.d/90-suvanjan-nopasswd` — no backup covers it; it is reinstalled per
+[rebuild.md](rebuild.md#step-8-passwordless-sudo-for-host-administration).
 
 ## Process Architecture
 
@@ -71,7 +66,11 @@ systemd --user  →  hermes-gateway.service
 ## What Hermes Is Allowed To Do
 
 - Read and write the `k8s-home` checkout, and open pull requests against it.
-- Run `kubectl`, `helm`, and read-only node commands as the `suvanjan` user.
+- Run `kubectl`, `helm`, and shell commands as the `suvanjan` user.
+- `sudo -n` for a fixed set of host-admin commands: `systemctl reboot|poweroff`, `systemctl
+  start|stop|restart|reload|enable|disable <unit>`, and `apt update|upgrade|autoremove|install|remove|purge` with
+  package-name arguments only. Everything else still requires a password and therefore fails in a non-interactive
+  turn. The drop-in is in [/etc/sudoers.d/90-suvanjan-nopasswd](rebuild.md#step-8-passwordless-sudo-for-host-administration).
 - Create and comment on issues and pull requests as a GitHub App bot identity.
 
 Standing rules enforced by convention, documented here so a reader knows what to expect in the git history:

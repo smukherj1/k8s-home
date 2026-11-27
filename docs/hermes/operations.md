@@ -30,6 +30,14 @@ Restarts are graceful for in-flight conversations: `KillMode=mixed` plus `Timeou
 70 seconds to unwind, and `RestartForceExitStatus=75` is treated as a normal exit so restarts do not trip the start
 limit.
 
+### Host-Level Operations
+
+Beyond this service and the cluster, the agent can reboot or power off the host, control **system** units, and manage
+apt packages, through a scoped `NOPASSWD` sudoers drop-in (`/etc/sudoers.d/90-suvanjan-nopasswd`, documented in
+[rebuild.md](rebuild.md#step-8-passwordless-sudo-for-host-administration)). It is not blanket root: commands outside
+the listed patterns still need a password and therefore fail inside an agent turn with `sudo: a password is required`.
+That error means "out of scope", not "broken".
+
 ### Emergency Stop
 
 If the agent is stuck in a loop, burning tokens, or should not act while you repair something:
@@ -118,53 +126,33 @@ Take a backup (below) before updating if there is anything in `~/.hermes` you wo
 Nothing backs Hermes up automatically today. **Hermes is not in Argo CD**, so a lost `~/.hermes` is not recovered by
 any reconciliation loop — it is recovered by this section.
 
-### What to back up
-
-| Path | Why | Recoverable otherwise? |
-|---|---|---|
-| `~/.hermes/config.yaml` | All settings | No — must be reconstructed by hand |
-| `~/.hermes/.env` | Credentials, keys | No — must be reissued |
-| `~/.hermes/skills/` | Learned procedures | Partly — upstream skills can be reinstalled, local ones cannot |
-| `~/.hermes/memories/` | Agent notes and user profile | No |
-| `~/.hermes/plugins/` | Installed plugins (`github_app`) | Yes — reinstallable, config is not |
-| `~/.hermes/bin/git-credential-github-app.py` | Git auth helper | No — local script |
-| `~/.hermes/state.db` | Session history, search index | Not needed to run; needed for history |
-| `~/.hermes/hermes-agent/` | The agent source | Yes — `git clone` / installer |
-| `~/.hermes/tools/` | Downloaded runtimes (~1.5 GB) | Yes — re-downloaded on demand |
-
 ### Backup
-
-Hermes ships a backup command that zips the home directory:
 
 ```shell
 hermes backup
 ```
 
-For a partial backup (or to control the destination and retention yourself), archive the irreplaceable subset:
+That zips the home directory, which is the whole of the agent's state — settings, `.env`, skills, plugins, memories,
+session history. Nothing is backed up selectively here because nothing under `~/.hermes` is disposable.
 
-```shell
-tar -czf ~/hermes-$(date +%F).tar.gz \
-  -C ~/.hermes config.yaml .env skills memories plugins bin
-```
+Two things are outside `~/.hermes` and therefore outside the archive: the git credential configuration
+(`~/.gitconfig`, reinstalled per [rebuild.md](rebuild.md#step-5-github-app-and-git-authentication)) and the sudoers
+drop-in ([rebuild.md](rebuild.md#step-8-passwordless-sudo-for-host-administration)). The `~/.hermes/hermes-agent`
+checkout is also excluded by design — it is re-installable.
 
-`.env` is a credential store: keep the archive off the public repositories, and treat it with the same care as the
-file itself.
+The archive contains `.env`, so it is a credential store: keep it off the public repositories and treat it with the
+same care as the file itself.
 
 ### Restore
 
 ```shell
-# Full restore from a `hermes backup` archive
 hermes import <archive>
-
-# Partial restore of the subset above
-tar -xzf ~/hermes-<date>.tar.gz -C ~/.hermes
-chmod 600 ~/.hermes/.env
 systemctl --user restart hermes-gateway
 ```
 
 After a restore, verify: `hermes doctor`, `hermes gateway status`, then a test Discord message. If GitHub operations
 fail, check that the private key named by `GITHUB_APP_PRIVATE_KEY_PATH` exists and is `0600` — the path is restored
-from `.env`, but the key file may not be, depending on what was included in the archive.
+from `.env`, but the key file may not be, depending on where it was stored.
 
 ## Troubleshooting
 

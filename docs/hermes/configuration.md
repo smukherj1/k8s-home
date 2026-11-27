@@ -49,8 +49,8 @@ The full file is self-documented, but these are the ones that change how the age
 | `delegation.*` | defaults | Sub-agent concurrency and background task behaviour. |
 | `timezone` | `America/New_York` | Timestamps in prompts, cron, and logs. |
 
-Memory and skills are the two things that make the agent useful between sessions; both live on disk and both are
-included in the backup procedure in [operations.md](operations.md#backup-and-restore).
+Memory and skills are the two things that make the agent useful between sessions; both live on disk under `~/.hermes`
+and are captured by `hermes backup` — see [operations.md](operations.md#backup-and-restore).
 
 ## Platforms and the Gateway
 
@@ -89,36 +89,27 @@ user, and the approval mode.
 
 ## Skills
 
-Skills are procedural memory: markdown files the agent loads on demand when a task matches. They live in
-`~/.hermes/skills/<category>/<skill>/SKILL.md` — currently ~45 skills across 13 categories (`devops`, `host-admin`,
-`software-development`, `research`, `productivity`, and others).
+Some skills shipped with Hermes are disabled, to focus the agent on what it does here: home-lab administration and
+software development.
 
-- Skills are loaded by relevance, not all at once, so an unused skill costs nothing per turn.
-- The agent can create and patch skills itself; that is how a workflow learned once survives into later sessions.
-- Individual skills can be disabled without deleting them:
+The disabled set is configuration, not a separate list to maintain — it lives in `skills.disabled` in `config.yaml`,
+so `hermes backup` captures it and a restore brings it back unchanged. To see what is actually disabled on this host:
 
 ```shell
 hermes config get skills.disabled
-hermes config set skills.disabled '["skill-a", "skill-b"]'
 ```
 
-Because skills encode the operator's preferred procedure, `~/.hermes/skills/` is part of the backup set, not
-disposable cache.
+Individual skills are enabled or disabled without deleting them (`hermes config set skills.disabled '["skill-a"]'`);
+what is enabled is also visible in the Hermes dashboard.
 
 ## Plugins
 
-Hermes ships bundled plugins (provider adapters, messaging platforms, browser and web-search backends) and enables
-most of them by default — 64 registered, 59 enabled on this host. Only one is **user-installed**:
-
-`github_app` (`~/.hermes/plugins/github_app`) — listed under `plugins.enabled` in `config.yaml`. It contributes seven
-tools (`github_identity`, `github_create_issue`, `github_comment_issue`, `github_list_issues`, `github_get_issue`,
-`github_review_pr`, `github_merge_pr`) and one `pre_tool_call` hook that resolves the bot identity and attaches
-attribution to every result.
+Hermes ships bundled plugins and enables most of them by default. Exactly one plugin is **user-installed** and
+therefore requires backing up: `github_app` (`~/.hermes/plugins/github_app`), which provides the GitHub API tools and
+bot identity described below. It is listed under `plugins.enabled` in `config.yaml`.
 
 ```shell
-hermes plugins list                 # everything, with status
-hermes plugins list --enabled       # enabled only
-hermes plugins list --user          # non-bundled only — the set that needs backing up
+hermes plugins list --user      # non-bundled only — the set that needs backing up
 ```
 
 Plugin installs can be given a longer clone deadline with `plugins.clone_timeout_seconds`; unused plugins are removed
@@ -161,8 +152,13 @@ Consequences worth knowing:
 
 ## Secret Handling Rules
 
+The conventions the agent follows — credentials never committed, never pushed to `main`, destructive commands only on
+request — are part of its memory files under `~/.hermes/memories/`, not this repository. They are captured by
+`hermes backup` and restored by `hermes import`, so they are not restated here; to read them, read the memory files
+(or ask the agent, which has them in context every turn).
+
+What matters operationally, and is not agent convention:
+
 - Credentials only in `~/.hermes/.env`; settings only in `config.yaml`. A non-credential setting placed in `.env` will
   not be read as configuration.
-- The cloned repositories are public. Never write a token, key, webhook URL, or credential-bearing URL into a commit,
-  a document, an issue, or a pull request — including this repository.
 - `.env` is `0600` and is backed up separately from the repo; treat any copy of it as sensitive.
