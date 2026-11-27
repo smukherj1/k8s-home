@@ -44,41 +44,6 @@ Outside `~/.hermes` entirely, the only machine-level grant the agent relies on i
 `/etc/sudoers.d/90-suvanjan-nopasswd` — no backup covers it; it is reinstalled per
 [rebuild.md](rebuild.md#step-8-passwordless-sudo-for-host-administration).
 
-## Process Architecture
-
-```
-systemd --user  →  hermes-gateway.service
-                     └── hermes gateway run            (one process per host)
-                           ├── Discord adapter         ← outbound/inbound messages
-                           ├── session store           → state.db, sessions/
-                           ├── agent loop              → model provider API
-                           └── tools                   → shell, files, kubectl, git, browser
-```
-
-- The gateway is **one process for the whole host**, not one per chat. Sessions are keyed per Discord channel/thread.
-- Each agent turn runs with the toolset configured for the originating platform (`platform_toolsets`), so a Discord
-  turn gets the Discord toolset, not the CLI one.
-- Model calls leave the host to the configured provider; nothing is served locally. There is no model server in the
-  cluster, so cluster GPU workloads and Hermes do not interact.
-- The agent is not a cluster client in the Kubernetes sense — it uses the host kubeconfig and runs `kubectl` like a
-  human operator would, which means its permissions are the kubeconfig's permissions.
-
-## What Hermes Is Allowed To Do
-
-- Read and write the `k8s-home` checkout, and open pull requests against it.
-- Run `kubectl`, `helm`, and shell commands as the `suvanjan` user.
-- `sudo -n` for a fixed set of host-admin commands: `systemctl reboot|poweroff`, `systemctl
-  start|stop|restart|reload|enable|disable <unit>`, and `apt update|upgrade|autoremove|install|remove|purge` with
-  package-name arguments only. Everything else still requires a password and therefore fails in a non-interactive
-  turn. The drop-in is in [/etc/sudoers.d/90-suvanjan-nopasswd](rebuild.md#step-8-passwordless-sudo-for-host-administration).
-- Create and comment on issues and pull requests as a GitHub App bot identity.
-
-Standing rules enforced by convention, documented here so a reader knows what to expect in the git history:
-
-- **Never push to `main`.** All changes go through a pull request for review.
-- **Never commit secrets.** The repositories are public; credentials live only in `~/.hermes/.env` and on disk.
-- Destructive actions (restarts, upgrades, reboots) are performed deliberately, not as a side effect of a question.
-
 ## Relationship to the Rest of This Repository
 
 | Document | Relevance to Hermes |
